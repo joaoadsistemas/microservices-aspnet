@@ -1,0 +1,50 @@
+<div class="container-fluid">
+  <div class="div" style="border: 1px solid black; padding: 10px">
+    <div class="row">
+      <div class="col-md-8">
+        <h2 style="text-align: center; color: blue">Products List</h2>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-primary" (click)="createProduct()">
+          <i class="bi bi-plus"></i> Create New Product
+        </button>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-12">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of products">
+              <td>{{ product.name }}</td>
+              <td>{{ product.categoryName }}</td>
+              <td>{{ product.price | currency : "BRL" : "symbol" }}</td>
+              <td class="text-center">
+                <button
+                  class="btn btn-success btn-sm"
+                  (click)="editProduct(product)"
+                >
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                  class="btn btn-danger btn-sm ms-2"
+                  (click)="deleteProduct(product)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

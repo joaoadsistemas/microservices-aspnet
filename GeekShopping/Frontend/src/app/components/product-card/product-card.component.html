@@ -1,0 +1,113 @@
+<!-- product-card.component.html -->
+<div class="container">
+  <h2 class="text-primary">
+    {{ product != null ? "Update Product" : "Create Product" }}
+  </h2>
+  <form [formGroup]="productForm">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input
+        type="text"
+        id="name"
+        class="form-control"
+        formControlName="name"
+      />
+      <div
+        *ngIf="
+          productForm.get('name')?.invalid && productForm.get('name')?.touched
+        "
+        class="text-danger"
+      >
+        Name is required.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="categoryName" class="form-label">Category Name</label>
+      <input
+        type="text"
+        id="categoryName"
+        class="form-control"
+        formControlName="categoryName"
+      />
+      <div
+        *ngIf="
+          productForm.get('categoryName')?.invalid &&
+          productForm.get('categoryName')?.touched
+        "
+        class="text-danger"
+      >
+        Category Name is required.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea
+        id="description"
+        class="form-control"
+        formControlName="description"
+      ></textarea>
+      <div
+        *ngIf="
+          productForm.get('description')?.invalid &&
+          productForm.get('description')?.touched
+        "
+        class="text-danger"
+      >
+        Description is required.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="imageURL" class="form-label">Image URL</label>
+      <input
+        type="text"
+        id="imageURL"
+        class="form-control"
+        formControlName="imageURL"
+      />
+      <div
+        *ngIf="
+          productForm.get('imageURL')?.invalid &&
+          productForm.get('imageURL')?.touched
+        "
+        class="text-danger"
+      >
+        Image URL is required.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="price" class="form-label">Price</label>
+      <input
+        type="number"
+        id="price"
+        class="form-control"
+        formControlName="price"
+      />
+      <div
+        *ngIf="
+          productForm.get('price')?.invalid && productForm.get('price')?.touched
+        "
+        class="text-danger"
+      >
+        Price is required and must be a positive number.
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary me-2" (click)="onBack()">
+      Back to List
+    </button>
+    <button
+      class="btn btn-success"
+      [disabled]="productForm.invalid"
+      (click)="onSubmit()"
+    >
+      {{ product != null ? "Update" : "Create" }}
+    </button>
+    <button
+      *ngIf="product != null"
+      type="button"
+      class="btn btn-danger ms-2"
+      (click)="onDelete()"
+    >
+      Delete
+    </button>
+  </form>
+</div>

@@ -1,4 +1,8 @@
 using GeekShopping.ProductAPI.Context;
+using GeekShopping.ProductAPI.Repositories;
+using GeekShopping.ProductAPI.Repositories.Interfaces;
+using GeekShopping.ProductAPI.Services;
+using GeekShopping.ProductAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -18,6 +22,23 @@ builder.Services.AddDbContext<SystemDbContext>(options =>
 });
 //
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +49,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Enable CORS
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthorization();
 
