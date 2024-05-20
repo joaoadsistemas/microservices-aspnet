@@ -1,5 +1,6 @@
 ﻿using GeekShopping.ProductAPI.DTOs;
 using GeekShopping.ProductAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,6 +37,7 @@ namespace GeekShopping.ProductAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult<ProductDTO>> InsertProductAsync([FromBody] ProductInsertDTO dto)
         {
             try
@@ -49,6 +51,8 @@ namespace GeekShopping.ProductAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
+
         public async Task<ActionResult<ProductDTO>> UpdateProductAsync([FromBody] ProductInsertDTO dto, int id)
         {
             try
@@ -63,6 +67,8 @@ namespace GeekShopping.ProductAPI.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
+
         public async Task<ActionResult<ProductDTO>> UpdateProductAsync(int id)
         {
             try
