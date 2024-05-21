@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
-import { IProductModel } from '../../models/IProductModel';
+import { IProductModel } from '../../models/product/IProductModel';
 import { ActivatedRoute, Router } from '@angular/router';
 import { pipe } from 'rxjs';
 

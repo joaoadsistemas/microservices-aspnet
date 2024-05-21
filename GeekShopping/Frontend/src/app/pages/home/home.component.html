@@ -1,0 +1,36 @@
+<div class="container d-flex align-items-center">
+  <div class="container row">
+    <ng-container *ngFor="let product of products">
+      <div class="col-4">
+        <div class="p-0 my-3 border">
+          <div class="card">
+            <img [src]="product.imageUrl" class="card-img-top" alt="..." />
+            <div class="card-body">
+              <h3 class="card-title text-success">{{ product.name }}</h3>
+              <span class="badge badge-light mb-2">{{
+                product.categoryName
+              }}</span>
+              <!-- Use the method to replace line breaks -->
+              <p
+                class="card-text"
+                [innerHTML]="replaceLineBreaks(product.description)"
+              ></p>
+              <div class="row">
+                <div class="col pt-1">
+                  <span style="font-size: 23px">{{
+                    product.price | currency : "BRL"
+                  }}</span>
+                </div>
+                <div class="col-4">
+                  <a (click)="detailsProduct(product)" class="btn btn-success"
+                    >Details</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

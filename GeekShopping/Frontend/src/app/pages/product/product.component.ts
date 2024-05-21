@@ -1,5 +1,5 @@
 import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { IProductModel } from '../../models/IProductModel';
+import { IProductModel } from '../../models/product/IProductModel';
 import { ProductService } from '../../services/product.service';
 import { Router } from '@angular/router';
 

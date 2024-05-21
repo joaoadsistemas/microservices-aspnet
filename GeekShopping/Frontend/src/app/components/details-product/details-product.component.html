@@ -1,0 +1,71 @@
+<div class="pt-4">
+  <div class="card container" style="border: 1px solid #808080">
+    <div class="card-header text-light row" style="border-radius: 0px">
+      <div class="col-12 col-md-6 pb-1">
+        <h1 class="text-dark">{{ product?.name }}</h1>
+      </div>
+      <div class="col-12 col-md-6 pb-1 text-end">
+        <h1 class="text-warning">{{ product?.price | currency : "BRL" }}</h1>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="container rounded p-2">
+        <div class="row">
+          <div class="col-12 col-lg-4 p-1 text-center">
+            <img
+              [src]="product?.imageUrl"
+              style="border-radius: 35px; width: 100%"
+              class="rounded"
+              alt="product-image"
+            />
+          </div>
+          <div class="col-12 col-lg-8">
+            <div class="row px-3">
+              <span class="badge badge-primary text-success p-2 border">
+                {{ product?.categoryName }}
+              </span>
+              <h3 class="text-success ms-2">
+                {{ product?.name }}
+              </h3>
+            </div>
+            <div class="row px-3">
+              <p
+                class="text-secondary"
+                [innerHTML]="replaceLineBreaks(product!.description)"
+              ></p>
+            </div>
+            <div class="row px-3">
+              <input
+                type="number"
+                name="Count"
+                class="form-control"
+                placeholder="Quantity"
+                [(ngModel)]="productCount"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer row">
+      <div class="col-12 col-md-6">
+        <button
+          type="button"
+          class="btn btn-success btn-lg me-2"
+          style="height: 50px; width: 100%"
+          (click)="back()"
+        >
+          Back to List
+        </button>
+      </div>
+      <div class="col-12 col-md-6">
+        <button
+          class="btn btn-primary btn-lg"
+          style="height: 50px; width: 100%"
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

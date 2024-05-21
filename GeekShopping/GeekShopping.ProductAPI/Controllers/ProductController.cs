@@ -24,6 +24,7 @@ namespace GeekShopping.ProductAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "ClientOnly")]
         public async Task<ActionResult<ProductDTO>> GetProductByIdAsync(int id)
         {
             try
