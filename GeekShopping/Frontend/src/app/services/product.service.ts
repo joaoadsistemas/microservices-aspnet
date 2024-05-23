@@ -9,10 +9,10 @@ import { IProductModel } from '../models/product/IProductModel';
 })
 export class ProductService {
   constructor(private http: HttpClient) {}
-  productApi = environment.productApi;
+  baseUrl = environment.productApi;
 
   getProductsAll() {
-    return this.http.get<Array<IProductModel>>(this.productApi).pipe(
+    return this.http.get<Array<IProductModel>>(this.baseUrl).pipe(
       map((res: Array<IProductModel>) => {
         return res;
       })
@@ -20,7 +20,7 @@ export class ProductService {
   }
 
   getProductById(id: number) {
-    return this.http.get<IProductModel>(`${this.productApi}/${id}`).pipe(
+    return this.http.get<IProductModel>(`${this.baseUrl}/${id}`).pipe(
       map((res: IProductModel) => {
         return res;
       })
@@ -28,7 +28,7 @@ export class ProductService {
   }
 
   addProduct(product: IProductModel) {
-    return this.http.post<IProductModel>(this.productApi, product).pipe(
+    return this.http.post<IProductModel>(this.baseUrl, product).pipe(
       map((res: IProductModel) => {
         return res;
       })
@@ -37,7 +37,7 @@ export class ProductService {
 
   updateProduct(product: IProductModel, id: number) {
     return this.http
-      .put<IProductModel>(`${this.productApi}/${id}`, product)
+      .put<IProductModel>(`${this.baseUrl}/${id}`, product)
       .pipe(
         map((res: IProductModel) => {
           return res;
@@ -46,7 +46,7 @@ export class ProductService {
   }
 
   deleteProduct(id: number) {
-    return this.http.delete<any>(`${this.productApi}/${id}`).pipe(
+    return this.http.delete<any>(`${this.baseUrl}/${id}`).pipe(
       map((res: any) => {
         return res;
       })
