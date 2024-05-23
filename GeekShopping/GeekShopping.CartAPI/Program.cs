@@ -45,7 +45,7 @@ namespace GeekShopping.CartAPI
                     builder =>
                     {
                         builder.WithOrigins("http://localhost:4200", "https://localhost:7128", "https://localhost:7201",
-                                "https://localhost:7063")
+                                "https://localhost:7063", "https://localhost:7170")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });

@@ -20,13 +20,13 @@ namespace GeekShopping.CartAPI.Services
         public async Task<CartDTO> FindCartByUserId(string userId)
         {
             var result = await _cartRepository.FindCartByUserId(userId);
-            return result;
+            return _mapper.Map<CartDTO>(result);
         }
 
         public async Task<CartDTO> SaveOrUpdateCart(CartDTO dto)
         {
             var result = await _cartRepository.SaveOrUpdateCart(dto);
-            return result;
+            return _mapper.Map<CartDTO>(result); ;
         }
 
         public async Task<bool> RemoveFromCart(int id)

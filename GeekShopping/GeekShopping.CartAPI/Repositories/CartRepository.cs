@@ -21,7 +21,7 @@ namespace GeekShopping.CartAPI.Repositories
         }
 
 
-        public async Task<CartDTO> FindCartByUserId(string userId)
+        public async Task<Cart> FindCartByUserId(string userId)
         {
             Cart cart = new Cart();
 
@@ -36,13 +36,13 @@ namespace GeekShopping.CartAPI.Repositories
                     .ToListAsync();
             }
 
-            return _mapper.Map<CartDTO>(cart);
+            return cart;
         }
 
 
 
 
-        public async Task<CartDTO> SaveOrUpdateCart(CartDTO dto)
+        public async Task<Cart> SaveOrUpdateCart(CartDTO dto)
         {
             Cart cart = _mapper.Map<Cart>(dto);
             //Checks if the product is already saved in the database if it does not exist then save
@@ -97,7 +97,7 @@ namespace GeekShopping.CartAPI.Repositories
                     await _dbContext.SaveChangesAsync();
                 }
             }
-            return _mapper.Map<CartDTO>(cart);
+            return cart;
         }
 
 
