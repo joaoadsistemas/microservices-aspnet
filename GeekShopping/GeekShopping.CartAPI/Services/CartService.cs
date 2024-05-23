@@ -37,12 +37,12 @@ namespace GeekShopping.CartAPI.Services
 
         public async Task<bool> ApplyCoupon(string userId, string couponCode)
         {
-            throw new NotImplementedException();
+            return await _cartRepository.ApplyCoupon(userId, couponCode);
         }
 
         public async Task<bool> RemoveCoupon(string userId)
         {
-            throw new NotImplementedException();
+            return await _cartRepository.RemoveCoupon(userId);
         }
 
         public async Task<bool> ClearCart(string userId)

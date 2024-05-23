@@ -1,14 +1,13 @@
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 using GeekShopping.CouponAPI.Context;
 using GeekShopping.CouponAPI.Repositories;
 using GeekShopping.CouponAPI.Repositories.Interfaces;
 using GeekShopping.CouponAPI.Services;
 using GeekShopping.CouponAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace GeekShopping.CouponAPI
 {
@@ -19,20 +18,14 @@ namespace GeekShopping.CouponAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
-            // BANCO DE DADOS
             builder.Services.AddDbContext<SystemDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-            //
-
 
             builder.Services.AddScoped<ICouponRepository, CouponRepository>();
             builder.Services.AddScoped<ICouponService, CouponService>();
 
-
-            // Add CORS policy
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
@@ -45,16 +38,14 @@ namespace GeekShopping.CouponAPI
                     });
             });
 
-
-            // Configure JWT authentication
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.Authority = "https://localhost:7128"; // URL of the authentication service
-                options.Audience = "product_api"; // Audience of the API
+                options.Authority = "https://localhost:7128";
+                options.Audience = "product_api";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -71,12 +62,8 @@ namespace GeekShopping.CouponAPI
                 options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client", "Admin"));
             });
 
-
-
-            // Configurações Swagger
             builder.Services.AddSwaggerGen(c =>
             {
-                // Configuração de autenticação do Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
@@ -114,19 +101,9 @@ namespace GeekShopping.CouponAPI
                 });
             });
 
-
-
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            
-
-
-
-
 
             var app = builder.Build();
 
@@ -139,14 +116,9 @@ namespace GeekShopping.CouponAPI
 
             app.UseHttpsRedirection();
             app.UseCors("AllowSpecificOrigin");
-
-
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }

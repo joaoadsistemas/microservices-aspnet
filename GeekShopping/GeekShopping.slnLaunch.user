@@ -16,6 +16,11 @@
         "Name": "GeekShopping.CartAPI\\GeekShopping.CartAPI.csproj",
         "Action": "Start",
         "DebugTarget": "https"
+      },
+      {
+        "Name": "GeekShopping.CouponAPI\\GeekShopping.CouponAPI.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
       }
     ]
   }

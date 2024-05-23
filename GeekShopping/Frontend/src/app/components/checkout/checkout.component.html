@@ -1,0 +1,212 @@
+<div *ngIf="cart.cartDetails.length > 0">
+  <form [formGroup]="placeOrderForm" (ngSubmit)="placeOrder()">
+    <input formControlName="userId" type="hidden" />
+    <input formControlName="id" type="hidden" />
+    <input formControlName="couponCode" type="hidden" />
+    <input formControlName="discountAmount" type="hidden" />
+    <input formControlName="purchaseAmount" type="hidden" />
+
+    <div>
+      <span style="font-size: 25px" class="text-warning">
+        Enter details and place order:
+      </span>
+      <br />
+    </div>
+
+    <div class="border mt-2">
+      <div class="container row">
+        <div class="col-7">
+          <div class="row">
+            <div class="col-12">
+              <label for="firstName" class="col-form-label">First Name:</label>
+              <input
+                id="firstName"
+                formControlName="firstName"
+                class="form-control"
+                type="text"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('firstName')?.invalid &&
+                  placeOrderForm.get('firstName')?.touched
+                "
+                class="text-danger"
+              >
+                First Name is required.
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="lastName" class="col-form-label">Last Name:</label>
+              <input
+                id="lastName"
+                formControlName="lastName"
+                class="form-control"
+                type="text"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('lastName')?.invalid &&
+                  placeOrderForm.get('lastName')?.touched
+                "
+                class="text-danger"
+              >
+                Last Name is required.
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="email" class="col-form-label">E-mail:</label>
+              <input
+                id="email"
+                formControlName="email"
+                class="form-control"
+                type="email"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('email')?.invalid &&
+                  placeOrderForm.get('email')?.touched
+                "
+                class="text-danger"
+              >
+                Enter a valid email address.
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="phone" class="col-form-label">Phone Number:</label>
+              <input
+                id="phone"
+                formControlName="phone"
+                class="form-control"
+                type="text"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('phone')?.invalid &&
+                  placeOrderForm.get('phone')?.touched
+                "
+                class="text-danger"
+              >
+                Enter a valid 11-digit phone number.
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="cardNumber" class="col-form-label"
+                >Card Number:</label
+              >
+              <input
+                id="cardNumber"
+                formControlName="cardNumber"
+                class="form-control"
+                type="password"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('cardNumber')?.invalid &&
+                  placeOrderForm.get('cardNumber')?.touched
+                "
+                class="text-danger"
+              >
+                Enter a valid 16-digit card number.
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="securityCode" class="col-form-label">CVV:</label>
+              <input
+                id="securityCode"
+                formControlName="securityCode"
+                class="form-control"
+                type="password"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('securityCode')?.invalid &&
+                  placeOrderForm.get('securityCode')?.touched
+                "
+                class="text-danger"
+              >
+                Enter a valid 3-digit CVV.
+              </div>
+            </div>
+            <div class="col-12 pb-4">
+              <label for="expirationDate" class="col-form-label"
+                >Expiry (MM/YY):</label
+              >
+              <input
+                id="expirationDate"
+                formControlName="expirationDate"
+                class="form-control"
+                type="text"
+                placeholder="MM/YY"
+              />
+              <div
+                *ngIf="
+                  placeOrderForm.get('expirationDate')?.invalid &&
+                  placeOrderForm.get('expirationDate')?.touched
+                "
+                class="text-danger"
+              >
+                Enter a valid expiration date (MM/YY).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-5">
+          <div class="card mt-4">
+            <div class="card-body">
+              <div class="d-none d-lg-block">
+                <div class="row text-danger">
+                  <div class="col-6">Product Details</div>
+                  <div class="col-3">Price</div>
+                  <div class="col-3">Count</div>
+                </div>
+              </div>
+
+              <hr />
+
+              <div *ngFor="let item of cart.cartDetails">
+                <div class="row h-100">
+                  <div class="col-6">
+                    <span style="font-size: 20px">{{ item.product.name }}</span>
+                  </div>
+                  <div class="col-3">
+                    <span style="font-size: 17px">
+                      {{ item.product.price | currency }}
+                    </span>
+                  </div>
+                  <div class="col-3">
+                    <span style="font-size: 17px">{{ item.count }}</span>
+                  </div>
+                </div>
+                <hr />
+              </div>
+
+              <div class="row">
+                <div class="col-12 text-right pr-4 text-danger">
+                  Purchase Amount: {{ total | currency }}
+                  <br />
+                  <span *ngIf="discount > 0" class="text-success">
+                    Discount Amount: {{ discount | currency }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="row">
+                <div class="col-12">
+                  <button
+                    type="submit"
+                    class="btn btn-success form-control"
+                    [disabled]="placeOrderForm.invalid"
+                  >
+                    <span>Place Order</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

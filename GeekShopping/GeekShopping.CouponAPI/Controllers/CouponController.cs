@@ -1,8 +1,8 @@
 ﻿using GeekShopping.CouponAPI.DTOs;
 using GeekShopping.CouponAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GeekShopping.CouponAPI.Controllers
 {
@@ -10,7 +10,6 @@ namespace GeekShopping.CouponAPI.Controllers
     [ApiController]
     public class CouponController : ControllerBase
     {
-
         private readonly ICouponService _couponService;
 
         public CouponController(ICouponService couponService)
@@ -24,13 +23,13 @@ namespace GeekShopping.CouponAPI.Controllers
         {
             try
             {
-                return Ok(_couponService.GetCouponByCode(couponCode));
+                var coupon = await _couponService.GetCouponByCode(couponCode);
+                return Ok(coupon);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-
     }
 }

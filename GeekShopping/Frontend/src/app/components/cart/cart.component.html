@@ -1,72 +1,105 @@
-<div class="container">
-  <div class="card my-4">
-    <div class="card-header">
-      <h4>Shopping Cart</h4>
-    </div>
-    <div class="card-body">
-      <div *ngIf="cart">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col">Product Details</th>
-              <th scope="col">Price</th>
-              <th scope="col">Count</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let detail of cart.cartDetails">
-              <td>
-                <div class="d-flex align-items-center">
-                  <img
-                    [src]="detail.product.imageUrl"
-                    alt="{{ detail.product.name }}"
-                    class="img-thumbnail"
-                    width="100"
-                  />
-                  <div class="ms-3">
-                    <h5>{{ detail.product.name }}</h5>
-                    <p>{{ detail.product.description }}</p>
-                  </div>
-                </div>
-              </td>
-              <td>{{ detail.product.price | currency : "BRL" }}</td>
-              <td>{{ detail.count }}</td>
-              <td>
-                <button
-                  class="btn btn-danger"
-                  (click)="removeCartDetail(detail.id)"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="d-flex justify-content-between">
-          <div class="input-group mb-3 w-50">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Coupon"
-              [(ngModel)]="couponCode"
-            />
-            <button class="btn btn-success" (click)="applyCoupon()">
-              Apply
+<div *ngIf="cart">
+  <form>
+    <input type="hidden" name="userId" [value]="userLogged?.id" />
+    <input type="hidden" name="cartId" [value]="cart?.cartHeader?.id" />
+    <div class="card border mt-4 container">
+      <div class="card-header bg-dark text-light ml-0 row">
+        <div class="col-6">
+          <i class="fa fa-shopping-cart"></i> &nbsp; Shopping Cart
+        </div>
+        <div class="col-6 text-end">
+          <a routerLink="/" class="btn btn-outline-warning btn-sm">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="d-none d-lg-block">
+          <div class="row text-info">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-5">Product Details</div>
+            <div class="col-lg-2">Price</div>
+            <div class="col-lg-2">Count</div>
+            <div class="col-lg-1"></div>
+          </div>
+        </div>
+
+        <hr />
+
+        <div *ngFor="let item of cart.cartDetails" class="row h-100">
+          <div class="col-4 col-md-2 text-center py-2">
+            <img [src]="item.product.imageUrl" class="rounded" width="100%" />
+          </div>
+          <div class="col-8 col-md-5">
+            <h5>{{ item.product.name }}</h5>
+            <div style="font-size: 11px">
+              {{ item.product.description }}
+            </div>
+          </div>
+          <div class="col-3 col-md-2 pt-md-4" style="font-size: 11px">
+            <span style="font-size: 17px">
+              {{ item.product.price | currency }}
+            </span>
+          </div>
+          <div class="col-3 col-md-2 pt-md-4" style="font-size: 11px">
+            <span style="font-size: 17px">
+              {{ item.count }}
+            </span>
+          </div>
+          <div class="col-2 col-lg-1 p-0 pt-lg-4 text-center">
+            <button class="btn btn-danger" (click)="removeCartDetail(item.id)">
+              <i class="bi bi-trash"></i>
             </button>
           </div>
-          <h4>Purchase Amount: {{ totalPrice | currency : "BRL" }}</h4>
         </div>
-        <div class="d-flex justify-content-end">
-          <button class="btn btn-secondary me-3" routerLink="/">
-            Continue Shopping
-          </button>
-          <button class="btn btn-success" (click)="checkout()">Checkout</button>
+        <hr />
+
+        <div class="row">
+          <div class="col-6">
+            <span>Coupon:</span>
+            <input type="text" [(ngModel)]="couponCode" name="couponCode" />
+            <button
+              *ngIf="!couponActive"
+              (click)="applyCoupon()"
+              class="btn btn-success"
+            >
+              Apply
+            </button>
+            <button
+              *ngIf="couponActive"
+              (click)="removeCoupon()"
+              class="btn btn-danger"
+            >
+              Remove
+            </button>
+          </div>
+          <div class="col-6 text-end">
+            <span class="text-danger" style="font-size: 21px">
+              Purchase Amount: {{ total | currency }}
+              <br />
+            </span>
+            <span *ngIf="discount > 0" class="text-success">
+              Discount Amount: {{ discount | currency }}
+              <br />
+            </span>
+          </div>
         </div>
       </div>
-      <div *ngIf="!cart">
-        <p>Your cart is empty.</p>
+      <div class="card-footer row">
+        <div class="col-6 col-md-3 offset-md-6"></div>
+        <div class="col-6 col-md-3">
+          <button
+            [disabled]="!cart"
+            (click)="checkout()"
+            class="btn btn-success form-control"
+          >
+            <span>Checkout</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </form>
+</div>
+<div *ngIf="!cart">
+  <p>Your Cart is Empty!</p>
 </div>
