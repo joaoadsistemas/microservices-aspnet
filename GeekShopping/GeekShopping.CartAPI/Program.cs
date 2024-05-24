@@ -3,6 +3,8 @@ using System.Text;
 using AutoMapper;
 using GeekShopping.CartAPI.Config;
 using GeekShopping.CartAPI.Context;
+using GeekShopping.CartAPI.RabbitMQSender;
+using GeekShopping.CartAPI.RabbitMQSender.Interfaces;
 using GeekShopping.CartAPI.Repositories;
 using GeekShopping.CartAPI.Repositories.Interfaces;
 using GeekShopping.CartAPI.Services;
@@ -30,6 +32,7 @@ namespace GeekShopping.CartAPI
 
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IRabbitMQMessageSender, RabbitMQMessageSender>();
 
             //AUTOMAPPER
             IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();

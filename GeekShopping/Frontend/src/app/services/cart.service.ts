@@ -3,6 +3,7 @@ import { environment } from '../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { ICartModel } from '../models/cart/ICartModel';
+import { IPlaceOrder } from '../models/placeorder/IPlaceOrder';
 
 @Injectable({
   providedIn: 'root',
@@ -47,4 +48,11 @@ export class CartService {
       map((res: boolean) => res)
     );
   }
+
+  checkout(placeOrder: IPlaceOrder) {
+    return this.http
+      .post<IPlaceOrder>(`${this.baseUrl}checkout`, placeOrder)
+      .pipe(map((res: IPlaceOrder) => res));
+  }
+
 }

@@ -1,3 +1,4 @@
+import { CartService } from './../../services/cart.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,7 +21,11 @@ export class CheckoutComponent implements OnInit {
   coupon: ICouponModel;
   cartHeader: ICartHeaderModel;
 
-  constructor(private router: Router, private fb: FormBuilder) {
+  constructor(
+    private router: Router,
+    private fb: FormBuilder,
+    private cartService: CartService
+  ) {
     this.placeOrderForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -81,14 +86,29 @@ export class CheckoutComponent implements OnInit {
       // Process the order securely, e.g., send the data to a secure backend service
       console.log('Order placed', this.placeOrderForm.value);
       this.placeOrderModel = this.placeOrderForm.value;
-      this.placeOrderModel!.couponCode = this.coupon.couponCode;
-      this.placeOrderModel!.discountAmount = this.discount;
+      if (this.discount && this.coupon) {
+        this.placeOrderModel!.couponCode = this.coupon.couponCode;
+        this.placeOrderModel!.discountAmount = this.discount;
+      } else {
+        this.placeOrderModel!.couponCode = '';
+        this.placeOrderModel!.discountAmount = 0;
+      }
       this.placeOrderModel!.purchaseAmount = this.total;
       this.placeOrderModel!.userId = this.cartHeader.userId;
       this.placeOrderModel!.dateTime = new Date();
       // ESTA DANDO CERTO!!!!!!!!!! CONTINUE DAQUI JOÃO
       //AGORA É SO PASSAR ESSE OBJETO PARA O BACKEND, OS DADOS JA ESTAO PRONTOS
-      console.log(this.placeOrderModel);
+      console.log('Place order model:', this.placeOrderModel);
+
+      this.cartService.checkout(this.placeOrderModel!).subscribe({
+        next: (res) => {
+          console.log('Order placed:', res);
+          this.router.navigate(['order-confirmation']);
+        },
+        error: (error) => {
+          console.error('Error placing order:', error);
+        },
+      });
     } else {
       console.log('Form is invalid');
     }

@@ -3,6 +3,7 @@ using GeekShopping.CartAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GeekShopping.CartAPI.RabbitMQSender.Interfaces;
 
 namespace GeekShopping.CartAPI.Controllers
 {
@@ -12,10 +13,12 @@ namespace GeekShopping.CartAPI.Controllers
     {
 
         private readonly ICartService _cartService;
+        private IRabbitMQMessageSender _rabbitMQSender;
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, IRabbitMQMessageSender rabbitMqSender)
         {
             _cartService = cartService;
+            _rabbitMQSender = rabbitMqSender;
         }
 
 
@@ -83,6 +86,29 @@ namespace GeekShopping.CartAPI.Controllers
             }
             return Ok(status);
         }
+
+
+        //RABBITMQ
+        [HttpPost("checkout")]
+        public async Task<ActionResult<PlaceOrderDTO>> Checkout([FromBody] PlaceOrderDTO dto)
+        {
+            if (dto?.UserId == null) return BadRequest();
+            var cart = await _cartService.FindCartByUserId(dto.UserId);
+            if (cart == null)
+            {
+                return NotFound();
+            }
+
+            dto.Id = Guid.NewGuid().ToString(); // Atribuindo um novo Guid a dto.Id
+            dto.MessageCreated = DateTime.Now;
+
+            // RABBITMQ VAI AQUI
+            _rabbitMQSender.SendMessage(dto, "checkoutqueue");
+
+            dto.CartDetails = cart.CartDetails;
+            return Ok(dto);
+        }
+
 
     }
 }
