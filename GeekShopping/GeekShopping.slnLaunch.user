@@ -26,6 +26,10 @@
         "Name": "GeekShopping.OrderAPI\\GeekShopping.OrderAPI.csproj",
         "Action": "Start",
         "DebugTarget": "https"
+      },
+      {
+        "Name": "GeekShopping.MessageBus\\GeekShopping.MessageBus.csproj",
+        "Action": "Start"
       }
     ]
   }

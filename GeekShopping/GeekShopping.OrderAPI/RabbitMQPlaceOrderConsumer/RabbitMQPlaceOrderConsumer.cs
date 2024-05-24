@@ -44,7 +44,6 @@ namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
                 PlaceOrderDTO placeOrder = JsonSerializer.Deserialize<PlaceOrderDTO>(content);
                 ProcessOrder(placeOrder).GetAwaiter().GetResult();
                 _channel.BasicAck(evt.DeliveryTag, false);
-                _channel.BasicAck(evt.DeliveryTag, false);
             };
             _channel.BasicConsume("checkoutqueue", false, consumer);
             return Task.CompletedTask;
