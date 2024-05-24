@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekShopping.CouponAPI", "G
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{10929276-7F6D-4D1B-BF7A-BFF6D1DB25B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekShopping.MessageBus", "GeekShopping.MessageBus\GeekShopping.MessageBus.csproj", "{E00C8FCD-7388-47A4-94C6-4046BB52177B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekShopping.MessageBus", "GeekShopping.MessageBus\GeekShopping.MessageBus.csproj", "{E00C8FCD-7388-47A4-94C6-4046BB52177B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekShopping.OrderAPI", "GeekShopping.OrderAPI\GeekShopping.OrderAPI.csproj", "{0B80C0E2-06F7-4918-B557-F30A5784266A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{E00C8FCD-7388-47A4-94C6-4046BB52177B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E00C8FCD-7388-47A4-94C6-4046BB52177B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E00C8FCD-7388-47A4-94C6-4046BB52177B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B80C0E2-06F7-4918-B557-F30A5784266A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B80C0E2-06F7-4918-B557-F30A5784266A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B80C0E2-06F7-4918-B557-F30A5784266A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B80C0E2-06F7-4918-B557-F30A5784266A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{26A5B9AC-C407-4A00-9860-33D78E2E55CD} = {AB0019B3-CDB9-4659-B3D4-DEE31469FEEE}
 		{78F80C5F-3747-4689-A7D1-67B275F3AAC7} = {AB0019B3-CDB9-4659-B3D4-DEE31469FEEE}
 		{E00C8FCD-7388-47A4-94C6-4046BB52177B} = {10929276-7F6D-4D1B-BF7A-BFF6D1DB25B1}
+		{0B80C0E2-06F7-4918-B557-F30A5784266A} = {AB0019B3-CDB9-4659-B3D4-DEE31469FEEE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BD91D429-0E5D-41E4-A8FC-ED7EBB7DAFF5}

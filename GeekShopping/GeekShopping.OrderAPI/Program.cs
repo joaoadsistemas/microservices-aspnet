@@ -1,17 +1,15 @@
 
-using GeekShopping.Authentication.Context;
-using GeekShopping.Authentication.Entities;
-using GeekShopping.Authentication.Interfaces;
-using GeekShopping.Authentication.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using GeekShopping.OrderAPI.Context;
+using GeekShopping.OrderAPI.RabbitMQMessageConsumer;
+using GeekShopping.OrderAPI.Repositories;
+using GeekShopping.OrderAPI.Repositories.Interfaces;
 
-namespace GeekShopping.Authentication
+namespace GeekShopping.OrderAPI
 {
     public class Program
     {
@@ -19,64 +17,20 @@ namespace GeekShopping.Authentication
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            // DATABASE
+            // Configuração do DbContext
             builder.Services.AddDbContext<SystemDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            // Configuração do repositório como Singleton
+            var dbContextBuilder = new DbContextOptionsBuilder<SystemDbContext>();
+            dbContextBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            builder.Services.AddSingleton(new OrderRepository(dbContextBuilder.Options));
 
-            builder.Services.AddScoped<ITokenService, TokenService>();
+            // injetando rabbitmq
+            builder.Services.AddHostedService<RabbitMQPlaceOrderConsumer>();
 
-
-            // Configuração do banco de dados com usuários e funções
-            builder.Services.AddIdentity<User, IdentityRole>(options =>
-                {
-                    // Configurações de normalização
-                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "; // Adicione ou remova caracteres conforme necessário
-                    options.User.RequireUniqueEmail = true; // Garante que os emails sejam únicos
-                })
-                .AddEntityFrameworkStores<SystemDbContext>()
-                .AddDefaultTokenProviders();
-
-
-            // Configuração JWT
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
-            {
-                var secretKey = builder.Configuration["JWT:SecretKey"] ?? throw new ArgumentException("Invalid Secret key");
-
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.Zero,
-                    ValidAudience = builder.Configuration["JWT:ValidAudience"],
-                    ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-                };
-            });
-
-
-            // Configuração e criação de políticas de acesso
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client", "Admin"));
-            });
 
             // Add CORS policy
             builder.Services.AddCors(options =>
@@ -90,6 +44,33 @@ namespace GeekShopping.Authentication
                             .AllowAnyMethod();
                     });
             });
+
+
+            // Configure JWT authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = "https://localhost:7128"; // URL of the authentication service
+                options.Audience = "product_api"; // Audience of the API
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:SecretKey"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true
+                };
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client", "Admin"));
+            });
+
 
 
             // Configurações Swagger
@@ -122,7 +103,7 @@ namespace GeekShopping.Authentication
 
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "GeekShoppingAuthentication",
+                    Title = "GeekShoppingOrder",
                     Version = "v1",
                     Contact = new OpenApiContact
                     {
@@ -132,6 +113,15 @@ namespace GeekShopping.Authentication
                     }
                 });
             });
+
+
+
+
+
+            builder.Services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 

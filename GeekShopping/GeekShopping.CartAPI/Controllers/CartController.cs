@@ -102,10 +102,11 @@ namespace GeekShopping.CartAPI.Controllers
             dto.Id = Guid.NewGuid().ToString(); // Atribuindo um novo Guid a dto.Id
             dto.MessageCreated = DateTime.Now;
 
+            dto.CartDetails = cart.CartDetails;
+
             // RABBITMQ VAI AQUI
             _rabbitMQSender.SendMessage(dto, "checkoutqueue");
-
-            dto.CartDetails = cart.CartDetails;
+            
             return Ok(dto);
         }
 
