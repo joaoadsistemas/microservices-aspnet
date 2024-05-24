@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { CouponService } from '../../services/coupon.service';
 import { Router } from '@angular/router';
+import { ICouponModel } from '../../models/coupon/ICouponModel';
 
 @Component({
   selector: 'app-cart',
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./cart.component.scss'],
 })
 export class CartComponent implements OnInit {
+  coupon: ICouponModel | null = null;
   cart: ICartModel | null = null;
   userLogged: IUserToken | null = null;
   couponCode: string = '';
@@ -81,6 +83,7 @@ export class CartComponent implements OnInit {
       this.couponService.getCoupon(this.couponCode).subscribe({
         next: (coupon) => {
           if (coupon && this.cart) {
+            this.coupon = coupon;
             this.cart.cartHeader.couponCode = coupon.couponCode;
 
             this.cart.cartDetails.forEach((cd) => {
@@ -114,6 +117,7 @@ export class CartComponent implements OnInit {
       this.cartService.removeCoupon().subscribe({
         next: (res) => {
           if (res) {
+            this.coupon = null;
             this.cart!.cartHeader.couponCode = '';
             this.couponActive = false;
             this.discount = 0;
@@ -129,7 +133,7 @@ export class CartComponent implements OnInit {
 
   checkout(): void {
     this.router.navigate(['checkout'], {
-      state: { cart: this.cart, total: this.total, discount: this.discount },
+      state: { cart: this.cart, total: this.total, discount: this.discount , coupon: this.coupon},
     });
   }
 }
