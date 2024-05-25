@@ -1,3 +1,4 @@
+import { CouponService } from './../../services/coupon.service';
 import { CartService } from './../../services/cart.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -6,6 +7,7 @@ import { ICartHeaderModel } from '../../models/cart/ICartHeaderModel';
 import { ICartModel } from '../../models/cart/ICartModel';
 import { IPlaceOrder } from '../../models/placeorder/IPlaceOrder';
 import { ICouponModel } from '../../models/coupon/ICouponModel';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-checkout',
@@ -20,11 +22,13 @@ export class CheckoutComponent implements OnInit {
   discount: number;
   coupon: ICouponModel;
   cartHeader: ICartHeaderModel;
+  err412: boolean = false;
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    private cartService: CartService
+    private cartService: CartService,
+    private couponService: CouponService
   ) {
     this.placeOrderForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -82,10 +86,13 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder(): void {
+    // seta o erro 412 para false sempre que tiver uma requisição de compra
+    this.err412 = false;
+
     if (this.placeOrderForm.valid) {
-      // Process the order securely, e.g., send the data to a secure backend service
       console.log('Order placed', this.placeOrderForm.value);
       this.placeOrderModel = this.placeOrderForm.value;
+
       if (this.discount && this.coupon) {
         this.placeOrderModel!.couponCode = this.coupon.couponCode;
         this.placeOrderModel!.discountAmount = this.discount;
@@ -93,11 +100,11 @@ export class CheckoutComponent implements OnInit {
         this.placeOrderModel!.couponCode = '';
         this.placeOrderModel!.discountAmount = 0;
       }
+
       this.placeOrderModel!.purchaseAmount = this.total;
       this.placeOrderModel!.userId = this.cartHeader.userId;
       this.placeOrderModel!.dateTime = new Date();
-      // ESTA DANDO CERTO!!!!!!!!!! CONTINUE DAQUI JOÃO
-      //AGORA É SO PASSAR ESSE OBJETO PARA O BACKEND, OS DADOS JA ESTAO PRONTOS
+
       console.log('Place order model:', this.placeOrderModel);
 
       this.cartService.checkout(this.placeOrderModel!).subscribe({
@@ -105,8 +112,34 @@ export class CheckoutComponent implements OnInit {
           console.log('Order placed:', res);
           this.router.navigate(['order-confirmation']);
         },
-        error: (error) => {
-          console.error('Error placing order:', error);
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 412) {
+            console.error('Precondition Failed:', error.message);
+            // Aqui você pode adicionar uma lógica específica para lidar com o erro 412
+            this.err412 = true;
+
+            // PEGA O NOVO VALOR ATRIBUIDO AO CUPOM E ATUALIZA A VARIAVEL
+            this.couponService
+              .getCoupon(this.placeOrderModel!.couponCode)
+              .subscribe({
+                next: (res) => {
+                  console.log('Coupon found:', res);
+                  this.coupon = res;
+                  this.discount = this.coupon.discountAmount;
+                },
+                error: (error) => {
+                  console.error('Error finding coupon:', error);
+                  alert(
+                    'An error occurred while finding the coupon. Please try again later.'
+                  );
+                },
+              });
+          } else {
+            console.error('Error placing order:', error);
+            alert(
+              'An error occurred while placing your order. Please try again later.'
+            );
+          }
         },
       });
     } else {

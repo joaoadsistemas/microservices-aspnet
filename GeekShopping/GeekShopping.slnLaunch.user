@@ -29,7 +29,8 @@
       },
       {
         "Name": "GeekShopping.MessageBus\\GeekShopping.MessageBus.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": ""
       }
     ]
   }

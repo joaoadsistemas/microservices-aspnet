@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using GeekShopping.CartAPI.RabbitMQSender.Interfaces;
+using GeekShopping.CartAPI.Services.Interfaces;
 
 namespace GeekShopping.CartAPI.Controllers
 {
@@ -13,12 +14,14 @@ namespace GeekShopping.CartAPI.Controllers
     {
 
         private readonly ICartService _cartService;
+        private readonly ICouponService _couponService;
         private IRabbitMQMessageSender _rabbitMQSender;
 
-        public CartController(ICartService cartService, IRabbitMQMessageSender rabbitMqSender)
+        public CartController(ICartService cartService, IRabbitMQMessageSender rabbitMqSender, ICouponService couponService)
         {
             _cartService = cartService;
             _rabbitMQSender = rabbitMqSender;
+            _couponService = couponService;
         }
 
 
@@ -92,6 +95,9 @@ namespace GeekShopping.CartAPI.Controllers
         [HttpPost("checkout")]
         public async Task<ActionResult<PlaceOrderDTO>> Checkout([FromBody] PlaceOrderDTO dto)
         {
+            // RECUPERANDO O TOKEN DA REQUEST
+            string token = Request.Headers["Authorization"];
+
             if (dto?.UserId == null) return BadRequest();
             var cart = await _cartService.FindCartByUserId(dto.UserId);
             if (cart == null)
@@ -99,12 +105,25 @@ namespace GeekShopping.CartAPI.Controllers
                 return NotFound();
             }
 
+            if (!string.IsNullOrEmpty(dto.CouponCode))
+            {
+                //entrando no microservices de coupon
+                CouponDTO coupon = await _couponService.GetCouponByCode(dto.CouponCode, token);
+
+                // verificando se mudou o calor do coupon
+                if (dto.DiscountAmount != coupon.DiscountAmount)
+                {
+                    // esse status code 412 quer dizer que mudou as condições desde que o cliente mandou a request
+                    return StatusCode(412);
+                }
+            }
+
             dto.Id = Guid.NewGuid().ToString(); // Atribuindo um novo Guid a dto.Id
             dto.MessageCreated = DateTime.Now;
 
             dto.CartDetails = cart.CartDetails;
 
-            // RABBITMQ VAI AQUI
+            // MANDANDO O PLACEORDER PARA O RABBITMQ
             _rabbitMQSender.SendMessage(dto, "checkoutqueue");
             
             return Ok(dto);

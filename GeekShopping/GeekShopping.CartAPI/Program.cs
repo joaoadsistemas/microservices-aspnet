@@ -8,6 +8,7 @@ using GeekShopping.CartAPI.RabbitMQSender.Interfaces;
 using GeekShopping.CartAPI.Repositories;
 using GeekShopping.CartAPI.Repositories.Interfaces;
 using GeekShopping.CartAPI.Services;
+using GeekShopping.CartAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +30,14 @@ namespace GeekShopping.CartAPI
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             //
+
+            builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+            builder.Services.AddScoped<ICouponService, CouponService>();
+
+            // INJEÇÃO DO OUTRO MICROSERVIÇO
+            builder.Services.AddHttpClient<ICouponRepository, CouponRepository>(s => s.BaseAddress =
+                new Uri("https://localhost:7170"));
+
 
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartService, CartService>();
