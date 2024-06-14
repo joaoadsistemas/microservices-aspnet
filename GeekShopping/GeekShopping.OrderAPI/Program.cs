@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using GeekShopping.OrderAPI.Context;
 using GeekShopping.OrderAPI.RabbitMQMessageConsumer;
+using GeekShopping.OrderAPI.RabbitMQSender;
+using GeekShopping.OrderAPI.RabbitMQSender.Interfaces;
 using GeekShopping.OrderAPI.Repositories;
 using GeekShopping.OrderAPI.Repositories.Interfaces;
 
@@ -28,8 +30,11 @@ namespace GeekShopping.OrderAPI
             dbContextBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             builder.Services.AddSingleton(new OrderRepository(dbContextBuilder.Options));
 
-            // injetando rabbitmq
+            // injetando rabbitmq consumer
             builder.Services.AddHostedService<RabbitMQPlaceOrderConsumer>();
+
+            // Configuração singleton do sender do RabbitMQ
+            builder.Services.AddSingleton<IRabbitMQMessageSender, RabbitMQMessageSender>();
 
 
             // Add CORS policy

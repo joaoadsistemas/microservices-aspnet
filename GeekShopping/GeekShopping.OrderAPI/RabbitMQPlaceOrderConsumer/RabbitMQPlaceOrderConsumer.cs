@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using GeekShopping.OrderAPI.DTOs;
 using GeekShopping.OrderAPI.Entities;
+using GeekShopping.OrderAPI.RabbitMQSender.Interfaces;
 using GeekShopping.OrderAPI.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,10 +17,12 @@ namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
         private readonly OrderRepository _orderRepository;
         private IConnection _connection;
         private IModel _channel;
+        private IRabbitMQMessageSender _rabbitMQMessageSender;
 
-        public RabbitMQPlaceOrderConsumer(OrderRepository repository)
+        public RabbitMQPlaceOrderConsumer(OrderRepository repository, IRabbitMQMessageSender rabbitMqMessageSender)
         {
             _orderRepository = repository;
+            _rabbitMQMessageSender = rabbitMqMessageSender;
 
             var factory = new ConnectionFactory
             {
@@ -88,6 +91,29 @@ namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
             }
 
             await _orderRepository.AddOrder(orderHeader);
+
+            PaymentDTO payment = new()
+            {
+                Name = orderHeader.FirstName + " " + orderHeader.LastName,
+                CardNumber = orderHeader.CardNumber,
+                SecurityCode = orderHeader.SecurityCode,
+                ExpirationDate = orderHeader.ExpirationDate,
+                Amount = orderHeader.PurchaseAmount,
+                Email = orderHeader.Email,
+                OrderId = orderHeader.Id
+            };
+
+            try
+            {
+
+                _rabbitMQMessageSender.SendMessage(payment, "orderpaymentprocessqueue");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         }
     }
-}
+
