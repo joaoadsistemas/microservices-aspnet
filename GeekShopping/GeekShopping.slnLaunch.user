@@ -31,6 +31,14 @@
         "Name": "GeekShopping.MessageBus\\GeekShopping.MessageBus.csproj",
         "Action": "Start",
         "DebugTarget": ""
+      },
+      {
+        "Name": "GeekShopping.PaymentProcessor\\GeekShopping.PaymentProcessor.csproj",
+        "Action": "Start"
+      },
+      {
+        "Name": "GeekShopping.PaymentAPI\\GeekShopping.PaymentAPI.csproj",
+        "Action": "Start"
       }
     ]
   }

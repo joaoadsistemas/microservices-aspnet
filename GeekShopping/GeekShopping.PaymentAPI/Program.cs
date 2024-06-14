@@ -1,15 +1,14 @@
-using GeekShopping.CouponAPI.Context;
-using GeekShopping.CouponAPI.Repositories;
-using GeekShopping.CouponAPI.Repositories.Interfaces;
-using GeekShopping.CouponAPI.Services;
-using GeekShopping.CouponAPI.Services.Interfaces;
+
+using System.Text;
+using GeekShopping.PaymentAPI.RabbitMQMessageConsumer;
+using GeekShopping.PaymentAPI.RabbitMQSender;
+using GeekShopping.PaymentAPI.RabbitMQSender.Interfaces;
+using GeekShopping.PaymentProcessor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
-namespace GeekShopping.CouponAPI
+namespace GeekShopping.PaymentAPI
 {
     public class Program
     {
@@ -18,13 +17,14 @@ namespace GeekShopping.CouponAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<SystemDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
 
-            builder.Services.AddScoped<ICouponRepository, CouponRepository>();
-            builder.Services.AddScoped<ICouponService, CouponService>();
+
+            // injeção de dependência para o ProcessPayment rabbitmq
+            builder.Services.AddSingleton<IProcessPayment, ProcessPayment>();
+            builder.Services.AddSingleton<IRabbitMQMessageSender, RabbitMQMessageSender>();
+            builder.Services.AddHostedService<RabbitMQPaymentConsumer>();
+            //
+
 
             // Add CORS policy
             builder.Services.AddCors(options =>
@@ -39,14 +39,18 @@ namespace GeekShopping.CouponAPI
                     });
             });
 
+
+
+
+            // Configure JWT authentication
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.Authority = "https://localhost:7128";
-                options.Audience = "product_api";
+                options.Authority = "https://localhost:7128"; // URL of the authentication service
+                options.Audience = "product_api"; // Audience of the API
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -57,14 +61,18 @@ namespace GeekShopping.CouponAPI
                 };
             });
 
+
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client", "Admin"));
             });
 
+
+            // Configurações Swagger
             builder.Services.AddSwaggerGen(c =>
             {
+                // Configuração de autenticação do Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
@@ -75,23 +83,23 @@ namespace GeekShopping.CouponAPI
                     Description = "Bearer JWT"
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
                 {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "GeekShoppingCoupon",
+                    Title = "GeekShoppingPayment",
                     Version = "v1",
                     Contact = new OpenApiContact
                     {
@@ -102,7 +110,14 @@ namespace GeekShopping.CouponAPI
                 });
             });
 
+
+
+
+
+
+
             builder.Services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -116,10 +131,16 @@ namespace GeekShopping.CouponAPI
             }
 
             app.UseHttpsRedirection();
+            // Enable CORS
             app.UseCors("AllowSpecificOrigin");
+
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+
             app.MapControllers();
+
             app.Run();
         }
     }

@@ -26,7 +26,7 @@ namespace GeekShopping.CartAPI.Repositories
             Cart cart = new Cart();
 
             cart.CartHeader = await _dbContext.CartHeaders
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.UserId == userId) ?? new CartHeader();
 
             if (cart.CartHeader != null)
             {

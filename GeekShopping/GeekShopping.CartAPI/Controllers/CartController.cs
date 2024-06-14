@@ -125,7 +125,10 @@ namespace GeekShopping.CartAPI.Controllers
 
             // MANDANDO O PLACEORDER PARA O RABBITMQ
             _rabbitMQSender.SendMessage(dto, "checkoutqueue");
-            
+
+            // limpando o carrinho apos o checkout
+            await _cartService.ClearCart(dto.UserId);
+
             return Ok(dto);
         }
 

@@ -25,7 +25,7 @@ namespace GeekShopping.OrderAPI.Repositories
             return true;
         }
 
-        public async Task UpdateOrderPaymentStatus(int orderHeaderId, bool status)
+        public async Task UpdateOrderPaymentStatus(long orderHeaderId, bool status)
         {
             await using var _db = new SystemDbContext(_dbContext);
             var header = await _db.Headers.FirstOrDefaultAsync(o => o.Id == orderHeaderId);

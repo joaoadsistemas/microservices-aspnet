@@ -85,7 +85,7 @@ namespace GeekShopping.Authentication
                     builder =>
                     {
                         builder.WithOrigins("http://localhost:4200", "https://localhost:7128", "https://localhost:7201",
-                                "https://localhost:7063", "https://localhost:7170", "https://localhost:7109")
+                                "https://localhost:7063", "https://localhost:7170", "https://localhost:7109", "https://localhost:7225")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });
