@@ -1,17 +1,15 @@
 
+using GeekShopping.Email.Context;
+using GeekShopping.Email.RabbitMQMessageConsumer;
+using GeekShopping.Email.Repositories;
+using GeekShopping.Email.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using GeekShopping.OrderAPI.Context;
-using GeekShopping.OrderAPI.RabbitMQMessageConsumer;
-using GeekShopping.OrderAPI.RabbitMQSender;
-using GeekShopping.OrderAPI.RabbitMQSender.Interfaces;
-using GeekShopping.OrderAPI.Repositories;
-using GeekShopping.OrderAPI.Repositories.Interfaces;
 
-namespace GeekShopping.OrderAPI
+namespace GeekShopping.Email
 {
     public class Program
     {
@@ -19,25 +17,26 @@ namespace GeekShopping.OrderAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add services to the container.
+
+
             // Configuração do DbContext
             builder.Services.AddDbContext<SystemDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+
+
             // Configuração do repositório como Singleton
             var dbContextBuilder = new DbContextOptionsBuilder<SystemDbContext>();
             dbContextBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            builder.Services.AddSingleton(new OrderRepository(dbContextBuilder.Options));
+            builder.Services.AddSingleton(new EmailRepository(dbContextBuilder.Options));
 
+            builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
-            // injetando os rabbitmq consumer
-            builder.Services.AddHostedService<RabbitMQPlaceOrderConsumer>();
             builder.Services.AddHostedService<RabbitMQPaymentConsumer>();
 
-
-            // Configuração singleton do sender do RabbitMQ
-            builder.Services.AddSingleton<IRabbitMQMessageSender, RabbitMQMessageSender>();
 
 
             // Add CORS policy
@@ -111,7 +110,7 @@ namespace GeekShopping.OrderAPI
 
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "GeekShoppingOrder",
+                    Title = "GeekShoppingEmail",
                     Version = "v1",
                     Contact = new OpenApiContact
                     {

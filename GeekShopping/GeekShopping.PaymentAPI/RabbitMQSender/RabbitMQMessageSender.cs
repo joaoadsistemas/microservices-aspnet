@@ -14,7 +14,9 @@ namespace GeekShopping.PaymentAPI.RabbitMQSender
         private readonly string _password;
         private readonly string _username;
         private IConnection _connection;
-        private const string _exchangeFanout = "FanoutPaymentUpdateExchange";
+        private const string _exchangeDirect = "DirectPaymentUpdateExchange";
+        private const string _paymentEmailUpdateQueueName = "PaymentEmailUpdateQueueName";
+        private const string _paymentOrderUpdateQueueName = "PaymentOrderUpdateQueueName";
 
         public RabbitMQMessageSender()
         {
@@ -38,12 +40,22 @@ namespace GeekShopping.PaymentAPI.RabbitMQSender
             using var channel = _connection.CreateModel();
 
             // utilizando exchange do tipo fanout
-            channel.ExchangeDeclare(_exchangeFanout, ExchangeType.Fanout, false);
+            channel.ExchangeDeclare(_exchangeDirect, ExchangeType.Direct, false);
+
+
+            // CONFIGURANDO AS FILAS PARA EMAIL E ORDER
+            channel.QueueDeclare(queue: _paymentEmailUpdateQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueDeclare(queue: _paymentOrderUpdateQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+            // bind na fila
+            channel.QueueBind(queue: _paymentEmailUpdateQueueName, exchange: _exchangeDirect, routingKey: "PaymentEmail");
+            channel.QueueBind(queue: _paymentOrderUpdateQueueName, exchange: _exchangeDirect, routingKey: "PaymentOrder");
 
             byte[] body = GetMessageAsByteArray(message);
 
             // publica a mensagem no exchange
-            channel.BasicPublish(exchange: _exchangeFanout, routingKey: "", basicProperties: null, body: body);
+            channel.BasicPublish(exchange: _exchangeDirect, routingKey: "PaymentEmail", basicProperties: null, body: body);
+            channel.BasicPublish(exchange: _exchangeDirect, routingKey: "PaymentOrder", basicProperties: null, body: body);
 
         }
 

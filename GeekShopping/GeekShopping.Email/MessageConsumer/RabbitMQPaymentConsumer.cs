@@ -1,28 +1,25 @@
-﻿using GeekShopping.OrderAPI.Repositories.Interfaces;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using GeekShopping.OrderAPI.DTOs;
-using GeekShopping.OrderAPI.Entities;
-using GeekShopping.OrderAPI.RabbitMQSender.Interfaces;
-using GeekShopping.OrderAPI.Repositories;
+using GeekShopping.Email.DTOs;
+using GeekShopping.Email.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
+namespace GeekShopping.Email.RabbitMQMessageConsumer
 {
     public class RabbitMQPaymentConsumer : BackgroundService
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly EmailRepository _emailRepository;
         private IConnection _connection;
         private IModel _channel;
         private const string _exchangeFanout = "DirectPaymentUpdateExchange";
-        private const string _paymentOrderUpdateQueueName = "PaymentOrderUpdateQueueName";
+        private const string _paymentEmailUpdateQueueName = "PaymentEmailUpdateQueueName";
 
-        public RabbitMQPaymentConsumer(OrderRepository repository)
+        public RabbitMQPaymentConsumer(EmailRepository repository)
         {
-            _orderRepository = repository;
+            _emailRepository = repository;
 
             var factory = new ConnectionFactory
             {
@@ -38,11 +35,11 @@ namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
             _channel.ExchangeDeclare(_exchangeFanout, ExchangeType.Direct);
 
             // criando a fila 
-            _channel.QueueDeclare(queue: _paymentOrderUpdateQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            _channel.QueueDeclare(queue: _paymentEmailUpdateQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
 
             // bind na fila
-            _channel.QueueBind(queue: _paymentOrderUpdateQueueName, exchange: _exchangeFanout, routingKey: "PaymentOrder");
+            _channel.QueueBind(queue: _paymentEmailUpdateQueueName, exchange: _exchangeFanout, routingKey: "PaymentEmail");
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,22 +50,20 @@ namespace GeekShopping.OrderAPI.RabbitMQMessageConsumer
             consumer.Received += async (channel, evt) =>
             {
                 var content = Encoding.UTF8.GetString(evt.Body.ToArray());
-                UpdatePaymentResultDTO updatePayment = JsonSerializer.Deserialize<UpdatePaymentResultDTO>(content);
-                UpdatePaymentStatus(updatePayment).GetAwaiter().GetResult();
+                ProcessLogsDTOs updatePayment = JsonSerializer.Deserialize<ProcessLogsDTOs>(content);
+                ProcessLogs(updatePayment).GetAwaiter().GetResult();
                 _channel.BasicAck(evt.DeliveryTag, false);
             };
-            _channel.BasicConsume(_paymentOrderUpdateQueueName, false, consumer);
+            _channel.BasicConsume(_paymentEmailUpdateQueueName, false, consumer);
             return Task.CompletedTask;
         }
 
-        private async Task UpdatePaymentStatus(UpdatePaymentResultDTO updatePayment)
+        private async Task ProcessLogs(ProcessLogsDTOs message)
         {
-            
-
             try
             {
 
-                await _orderRepository.UpdateOrderPaymentStatus(updatePayment.OrderId, updatePayment.Status);
+                await _emailRepository.SendEmailAsync(message);
 
             }
             catch (Exception ex)
